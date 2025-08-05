@@ -16,3 +16,4 @@ local.properties
 
 # keep API keys out of source
 /gradle.properties
+/secrets.properties
