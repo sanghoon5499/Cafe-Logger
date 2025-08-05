@@ -1,4 +1,4 @@
-package com.example.cafelogger
+package com.choi.cafelogger
 
 import org.junit.Test
 

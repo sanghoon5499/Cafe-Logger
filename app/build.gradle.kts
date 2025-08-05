@@ -1,14 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+//    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+val MAPS_API_KEY: String by project
+
 android {
-    namespace = "com.example.cafelogger"
+    namespace = "com.choi.cafelogger"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.cafelogger"
+        applicationId = "com.choi.cafelogger"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -38,6 +42,11 @@ android {
     }
 }
 
+secrets{
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "local.defaults.properties"
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -48,6 +57,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

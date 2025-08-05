@@ -1,4 +1,4 @@
-package com.example.cafelogger.ui.gallery
+package com.choi.cafelogger.ui.gallery
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
