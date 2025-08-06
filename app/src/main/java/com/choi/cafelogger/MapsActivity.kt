@@ -1,5 +1,13 @@
 package com.choi.cafelogger
 
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -21,12 +29,10 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.gson.Gson
+
+import java.io.IOException
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -65,7 +71,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             enableLocationAndCenterMap()
-            searchNearbyCafes()
         } else {
             ActivityCompat.requestPermissions(
                 this,
@@ -73,8 +78,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 REQUEST_LOCATION_PERMISSION
             )
         }
-
-        searchSpecialtyCoffee()
     }
 
     @SuppressLint("MissingPermission")
@@ -89,67 +92,60 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         1000,
                         null
                     )
+                    searchSpecialtyCoffeeNearby(myLatLng)
                 }
             }
     }
 
-    private fun searchNearbyCafes() {
-        // 1) Make sure we have location permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) return
-
-        // 2) Specify the fields we want
-        val placeFields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
-
-        // 3) Build the request
-        val request = FindCurrentPlaceRequest.newInstance(placeFields)
-
-        // 4) Call it
-        placesClient.findCurrentPlace(request)
-            .addOnSuccessListener { response ->
-                // clear old markers
-                mMap.clear()
-                // add each place as a marker
-                for (likelihood in response.placeLikelihoods) {
-                    val place = likelihood.place
-                    place.latLng?.let { ll ->
-                        mMap.addMarker(MarkerOptions().position(ll).title(place.name))
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("MapsActivity", "Current place request failed", e)
-            }
-    }
-
-
-    private fun searchSpecialtyCoffee() {
-        // placesClient is now non-null, so this won’t crash
-        val token = AutocompleteSessionToken.newInstance()
-        val request = FindAutocompletePredictionsRequest.builder()
-            .setQuery("specialty coffee")
+    private fun searchSpecialtyCoffeeNearby(myLL: LatLng) {
+        // 1) Build the URL
+        val apiKey = retrieveApiKeyFromManifest()
+        val url = HttpUrl.Builder()
+            .scheme("https")
+            .host("maps.googleapis.com")
+            .addPathSegments("maps/api/place/nearbysearch/json")
+            .addQueryParameter("location", "${myLL.latitude},${myLL.longitude}")
+            .addQueryParameter("radius", "5000")
+            .addQueryParameter("keyword", "specialty coffee")
+            .addQueryParameter("key", apiKey)
             .build()
 
-        placesClient.findAutocompletePredictions(request)
-            .addOnSuccessListener { resp ->
-                resp.autocompletePredictions.forEach { pred ->
-                    val placeReq = FetchPlaceRequest.builder(
-                        pred.placeId,
-                        listOf(Place.Field.LAT_LNG, Place.Field.NAME)
-                    ).build()
+        // 2) Create request + client
+        val request = Request.Builder().url(url).build()
+        val client = OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            .build()
 
-                    placesClient.fetchPlace(placeReq)
-                        .addOnSuccessListener { placeResp ->
-                            placeResp.place.latLng?.let { ll ->
+        // 3) Fire asynchronously
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("MapsActivity", "Nearby search failed", e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.body?.string()?.let { bodyStr ->
+                    val resp = Gson().fromJson(bodyStr, NearbySearchResponse::class.java)
+                    if (resp.status == "OK") {
+                        runOnUiThread {
+                            // clear old pins
+                            mMap.clear()
+                            for (r in resp.results) {
+                                val ll = LatLng(r.geometry.location.lat, r.geometry.location.lng)
                                 mMap.addMarker(
-                                    MarkerOptions().position(ll).title(placeResp.place.name)
+                                    MarkerOptions()
+                                        .position(ll)
+                                        .title(r.name)
                                 )
                             }
                         }
+                    } else {
+                        Log.w("MapsActivity", "Places API returned ${resp.status}")
+                    }
                 }
             }
+        })
     }
+
 
     private fun retrieveApiKeyFromManifest(): String {
         val ai = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
