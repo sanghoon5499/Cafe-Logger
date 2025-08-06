@@ -11,12 +11,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.TextWatcher
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -37,6 +38,17 @@ import com.google.gson.Gson
 
 import java.io.IOException
 import androidx.core.graphics.scale
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.model.AutocompletePrediction
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -48,6 +60,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
+    private lateinit var suggestionAdapter: SuggestionAdapter
+    private var userCenter: LatLng? = null
+    private lateinit var searchWatcher: TextWatcher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,8 +76,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         Places.initialize(this, retrieveApiKeyFromManifest())
         placesClient = Places.createClient(this)
 
+        // 3) Initialize Adapter for suggestions + recyclerview
+        suggestionAdapter = SuggestionAdapter(::onSuggestionClicked)
+        binding.rvSearchResults.apply {
+            layoutManager = LinearLayoutManager(this@MapsActivity)
+            adapter = suggestionAdapter
+        }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        // 4) Start watching text inputs
+        searchWatcher = binding.etSearch.addTextChangedListener { text ->
+            val query = text?.toString().orEmpty()
+            if (query.length < 2) {
+                binding.rvSearchResults.isGone = true
+            } else {
+                binding.rvSearchResults.isVisible = true
+                performAutocomplete(query)
+            }
+        }
+
+        // 5) Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -90,13 +122,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 location?.let {
-                    val myLatLng = LatLng(it.latitude, it.longitude)
+                    userCenter = LatLng(it.latitude, it.longitude)
                     mMap.animateCamera(
-                        CameraUpdateFactory.newLatLngZoom(myLatLng, 15f),
+                        CameraUpdateFactory.newLatLngZoom(userCenter!!, 15f),
                         1000,
                         null
                     )
-                    searchSpecialtyCoffeeNearby(myLatLng)
+                    searchSpecialtyCoffeeNearby(userCenter!!)
                 }
             }
     }
@@ -153,6 +185,68 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
     }
+
+    private fun performAutocomplete(query: String) {
+        val center = userCenter ?: return
+        val delta = 0.01
+        val bounds = RectangularBounds.newInstance(
+            LatLng(center.latitude - delta, center.longitude - delta),
+            LatLng(center.latitude + delta, center.longitude + delta)
+        )
+
+        val token = AutocompleteSessionToken.newInstance()
+        val request = FindAutocompletePredictionsRequest.builder()
+            .setSessionToken(token)
+            .setTypeFilter(TypeFilter.ESTABLISHMENT)
+            .setQuery(query)
+            .setLocationBias(bounds)
+            .build()
+
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { resp ->
+                // pass both the raw predictions and the session token
+                suggestionAdapter.submitList(resp.autocompletePredictions, token)
+                binding.rvSearchResults.isVisible = resp.autocompletePredictions.isNotEmpty()
+            }
+            .addOnFailureListener { e ->
+                Log.e("MapsActivity", "Autocomplete failed", e)
+            }
+    }
+
+    fun onSuggestionClicked(prediction: AutocompletePrediction, token: AutocompleteSessionToken) {
+        // 1) Deselect text field and hide the keyboard
+        binding.etSearch.removeTextChangedListener(searchWatcher)
+        binding.etSearch.clearFocus()
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
+
+        // 2) Hide the list
+        binding.rvSearchResults.isGone = true
+        binding.etSearch.addTextChangedListener(searchWatcher)
+
+        // 3) Fetch the place’s details
+        val placeReq = FetchPlaceRequest.builder(
+            prediction.placeId,
+            listOf(Place.Field.LAT_LNG, Place.Field.NAME)
+        )
+            .setSessionToken(token)
+            .build()
+
+        placesClient.fetchPlace(placeReq)
+            .addOnSuccessListener { resp ->
+                val ll = resp.place.getLatLng()!!
+                // 3) Move the map + drop a marker
+                mMap.clear()
+                mMap.addMarker(MarkerOptions().position(
+                    com.google.android.gms.maps.model.LatLng(ll.latitude, ll.longitude)
+                ).title(resp.place.name))
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    com.google.android.gms.maps.model.LatLng(ll.latitude, ll.longitude), 15f))
+            }
+    }
+
+
+    // ------------------------------- Backend: APIs, Permissions ------------------------------- //
 
 
     private fun retrieveApiKeyFromManifest(): String {

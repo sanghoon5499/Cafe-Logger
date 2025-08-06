@@ -75,6 +75,19 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- keep your RecyclerView or other overlays here -->
+    <!-- keep RecyclerView or other overlays here -->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearchResults"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/cvSearchContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
