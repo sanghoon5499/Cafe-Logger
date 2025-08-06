@@ -221,17 +221,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun onSuggestionClicked(prediction: AutocompletePrediction, token: AutocompleteSessionToken) {
-        // 1) Deselect text field and hide the keyboard
+        // 1) Temporarily stop reacting to text changes
         binding.etSearch.removeTextChangedListener(searchWatcher)
+
+        // 2) Hide the suggestions list immediately
+        binding.rvSearchResults.isGone = true
+
+        // 3) Populate the field with just the name & clear focus
+        binding.etSearch.setText(prediction.getPrimaryText(null))
         binding.etSearch.clearFocus()
+
+        // 4) Hide the keyboard
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
 
-        // 2) Hide the list
-        binding.rvSearchResults.isGone = true
+        // 5) Re-attach your text watcher
         binding.etSearch.addTextChangedListener(searchWatcher)
 
-        // 3) Fetch the place’s details
+        // 6) Now fetch the place’s full details and drop a marker
         val placeReq = FetchPlaceRequest.builder(
             prediction.placeId,
             listOf(Place.Field.LAT_LNG, Place.Field.NAME)
@@ -241,16 +248,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         placesClient.fetchPlace(placeReq)
             .addOnSuccessListener { resp ->
-                val ll = resp.place.getLatLng()!!
-                // 3) Move the map + drop a marker
-                mMap.clear()
-                mMap.addMarker(MarkerOptions().position(
-                    com.google.android.gms.maps.model.LatLng(ll.latitude, ll.longitude)
-                ).title(resp.place.name))
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    com.google.android.gms.maps.model.LatLng(ll.latitude, ll.longitude), 15f))
+                val ll = resp.place.latLng!!
+                mMap.addMarker(
+                    MarkerOptions()
+                        .position(LatLng(ll.latitude, ll.longitude))
+                        .title(resp.place.name)
+                )
+                mMap.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(LatLng(ll.latitude, ll.longitude), 15f)
+                )
             }
     }
+
 
 
     // ------------------------------- Backend: APIs, Permissions ------------------------------- //
