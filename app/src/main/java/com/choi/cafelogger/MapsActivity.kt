@@ -41,6 +41,7 @@ import androidx.core.graphics.scale
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
@@ -83,7 +84,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             adapter = suggestionAdapter
         }
 
-        // 4) Start watching text inputs
+        // 4) Create divider for search results
+        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL).apply {
+            setDrawable(ContextCompat.getDrawable(this@MapsActivity, R.drawable.divider)!!)
+        }
+        binding.rvSearchResults.addItemDecoration(divider)
+
+        // 5) Start watching text inputs
         searchWatcher = binding.etSearch.addTextChangedListener { text ->
             val query = text?.toString().orEmpty()
             if (query.length < 2) {
@@ -94,7 +101,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // 5) Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        // 6) Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
