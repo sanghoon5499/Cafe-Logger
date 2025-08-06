@@ -11,6 +11,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -30,9 +32,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.gson.Gson
 
 import java.io.IOException
+import androidx.core.graphics.scale
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -130,11 +134,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             // clear old pins
                             mMap.clear()
                             for (r in resp.results) {
+                                val original = BitmapFactory.decodeResource(resources, R.drawable.coffee_pin)
+                                val scaled = original.scale(80, 80, false)
+
                                 val ll = LatLng(r.geometry.location.lat, r.geometry.location.lng)
                                 mMap.addMarker(
                                     MarkerOptions()
                                         .position(ll)
                                         .title(r.name)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(scaled))
                                 )
                             }
                         }
