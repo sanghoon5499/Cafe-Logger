@@ -19,48 +19,56 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <View
+        android:id="@+id/vSearchBannerBg"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <!-- white pill container for search + filter -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cvSearchContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="24dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="4dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/vSearchBannerBg"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="56dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
 
             <!-- search field -->
-            <com.google.android.material.textfield.TextInputLayout
+            <EditText
+                android:id="@+id/etSearch"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
                 android:layout_weight="1"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSearch"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="Search cafes..."
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:background="@null"
-                    android:imeOptions="actionSearch"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:hint="Search cafes..."
+                android:paddingVertical="8dp"
+                android:drawableStart="@drawable/search_1"
+                android:drawablePadding="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:imeOptions="actionSearch"/>
 
             <!-- filter button -->
             <ImageButton
                 android:id="@+id/btnFilter"
                 android:layout_width="48dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/search_1"
+                android:src="@drawable/filter_1"
                 android:contentDescription="Search"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/black"/>

@@ -33,6 +33,7 @@
 
         <activity
             android:name=".MapsActivity"
+            android:theme="@style/Theme.CafeLogger.NoActionBar"
             android:exported="false"
             android:label="@string/title_activity_maps" />
         <activity
