@@ -70,6 +70,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        Log.d("CafeLoggerDEBUG", "MapsActivity.kt")
+
         // 1) Initialize Location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
