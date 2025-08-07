@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -52,7 +53,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter an address or the café’s name"
-                android:inputType="textPostalAddress"/>
+                android:inputType="textPostalAddress|textNoSuggestions"
+                android:privateImeOptions="noPersonalizedLearning"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Two dropdowns side by side: Type & Roast Level -->
@@ -90,7 +92,7 @@
                         android:id="@+id/actvType"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Beans, drink…"
+                        android:hint="Beans, Beverage..."
                         android:inputType="none"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -162,7 +164,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Where were the beans harvested?"
-                    android:inputType="text"/>
+                    android:inputType="text|textNoSuggestions"
+                    android:privateImeOptions="noPersonalizedLearning"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -194,7 +197,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Any fermentation process?"
-                    android:inputType="text"/>
+                    android:inputType="text|textNoSuggestions"
+                    android:privateImeOptions="noPersonalizedLearning"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -223,7 +227,7 @@
                 app:endIconMode="dropdown_menu">
 
                 <AutoCompleteTextView
-                    android:id="@+id/actvDrinkStyle"
+                    android:id="@+id/actvBeverageStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Latte, pour over, espresso…"

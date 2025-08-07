@@ -14,9 +14,16 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.CafeLogger.NoActionBar">
+    <style name="Theme.CafeLogger.NoActionBar"
+        parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Hide the ActionBar -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <!-- make status bar transparent so content can draw behind it -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- dark icons/text in status bar (since your bar is light) -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.CafeLogger.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
