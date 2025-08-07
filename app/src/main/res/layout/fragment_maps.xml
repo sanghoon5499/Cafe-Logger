@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- This is the Google Map itself -->
+    <!-- full-screen map -->
     <fragment
         android:id="@+id/supportMapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -15,9 +15,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- your white banner + pill and RecyclerView go on top exactly as in activity_maps.xml -->
     <View
         android:id="@+id/vSearchBannerBg"
         android:layout_width="0dp"
@@ -27,6 +26,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- white pill container for search + filter -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cvSearchContainer"
         android:layout_width="0dp"
@@ -39,9 +39,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- … your EditText + filter button here … -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
 
+            <!-- search field -->
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:hint="Search cafes..."
+                android:paddingVertical="8dp"
+                android:drawableStart="@drawable/search_1"
+                android:drawablePadding="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:imeOptions="actionSearch"/>
+
+            <!-- filter button -->
+            <ImageButton
+                android:id="@+id/btnFilter"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/filter_1"
+                android:contentDescription="Search"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/black"/>
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <!-- keep RecyclerView or other overlays here -->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSearchResults"

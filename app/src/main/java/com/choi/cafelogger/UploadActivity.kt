@@ -1,6 +1,7 @@
 package com.choi.cafelogger
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 class UploadActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("cafeloggerDEBUG", "UploadActivity.kt")
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_upload)
 

@@ -14,19 +14,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
+import androidx.appcompat.app.AppCompatActivity.INPUT_METHOD_SERVICE
 import androidx.core.content.ContextCompat
+
 import androidx.core.graphics.scale
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.choi.cafelogger.NearbySearchResponse
 import com.choi.cafelogger.R
 import com.choi.cafelogger.SuggestionAdapter
-import com.choi.cafelogger.databinding.ActivityMapsBinding
 import com.choi.cafelogger.databinding.FragmentMapsBinding
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -45,9 +47,12 @@ import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.gson.Gson
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
 
@@ -57,143 +62,147 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         private const val REQUEST_LOCATION_PERMISSION = 1
     }
 
-    private var _binding: FragmentMapsBinding? = null
-    private val binding get() = _binding!!
-
     private lateinit var mMap: GoogleMap
-    private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
     private lateinit var suggestionAdapter: SuggestionAdapter
     private var userCenter: LatLng? = null
     private lateinit var searchWatcher: TextWatcher
-    private lateinit var bindingMaps: ActivityMapsBinding
+
+    private var _binding: FragmentMapsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMapsBinding.inflate(inflater, container, false)
-        return bindingMaps.root
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d("CafeLoggerDEBUG", "MapsFragment.kt")
-
-        // 1) Location SDK
+        // 1) Initialize Location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        // 2) Places SDK
-        Places.initialize(requireContext(), retrieveApiKey())
+        // 2) Initialize Places SDK & client
+        Places.initialize(requireContext(), retrieveApiKeyFromManifest())
         placesClient = Places.createClient(requireContext())
 
-        // 3) RecyclerView + adapter
+        // 3) Initialize Adapter for suggestions + recyclerview
         suggestionAdapter = SuggestionAdapter(::onSuggestionClicked)
-        bindingMaps.rvSearchResults.apply {
+        binding.rvSearchResults.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = suggestionAdapter
-            val divider = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
-                .apply {
-                    setDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.divider)!!)
-                }
-            addItemDecoration(divider)
         }
 
-        // 4) Text watcher
-        searchWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val q = s?.toString().orEmpty()
-                if (q.length < 2) bindingMaps.etSearch.isGone = true
-                else {
-                    bindingMaps.etSearch.isVisible = true
-                    performAutocomplete(q)
-                }
+        // 4) Create divider for search results
+        val divider = DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL).apply {
+            setDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.divider)!!)
+        }
+        binding.rvSearchResults.addItemDecoration(divider)
+
+        // 5) Start watching text inputs
+        searchWatcher = binding.etSearch.addTextChangedListener { text ->
+            val query = text?.toString().orEmpty()
+            if (query.length < 2) {
+                binding.rvSearchResults.isGone = true
+            } else {
+                binding.rvSearchResults.isVisible = true
+                performAutocomplete(query)
             }
-            override fun afterTextChanged(s: Editable?) {}
         }
-        bindingMaps.etSearch.addTextChangedListener(searchWatcher)
 
-        // 5) Map fragment
-        val mapFrag = childFragmentManager.findFragmentById(R.id.supportMapFragment)
-                as SupportMapFragment
-        mapFrag.getMapAsync(this)
+        // 6) Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        val mapFragment = childFragmentManager
+            .findFragmentById(R.id.supportMapFragment) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+
         if (ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            enableLocationAndSearch()
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            enableLocationAndCenterMap()
         } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
+            requestPermissions(arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION),
+                REQUEST_LOCATION_PERMISSION)
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun enableLocationAndSearch() {
+    private fun enableLocationAndCenterMap() {
         mMap.isMyLocationEnabled = true
-        fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
-            loc?.let {
-                userCenter = LatLng(it.latitude, it.longitude)
-                mMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(userCenter!!, 15f),
-                    1000, null
-                )
-                searchSpecialtyCoffeeNearby(userCenter!!)
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                location?.let {
+                    userCenter = LatLng(it.latitude, it.longitude)
+                    mMap.animateCamera(
+                        CameraUpdateFactory.newLatLngZoom(userCenter!!, 15f),
+                        1000,
+                        null
+                    )
+                    searchSpecialtyCoffeeNearby(userCenter!!)
+                }
             }
-        }
     }
 
-    private fun searchSpecialtyCoffeeNearby(center: LatLng) {
-        val apiKey = retrieveApiKey()
+    private fun searchSpecialtyCoffeeNearby(myLL: LatLng) {
+        // 1) Build the URL
+        val apiKey = retrieveApiKeyFromManifest()
         val url = HttpUrl.Builder()
             .scheme("https")
             .host("maps.googleapis.com")
             .addPathSegments("maps/api/place/nearbysearch/json")
-            .addQueryParameter("location", "${center.latitude},${center.longitude}")
+            .addQueryParameter("location", "${myLL.latitude},${myLL.longitude}")
             .addQueryParameter("radius", "5000")
             .addQueryParameter("keyword", "specialty coffee")
             .addQueryParameter("key", apiKey)
             .build()
 
-        val req = Request.Builder().url(url).build()
+        // 2) Create request + client
+        val request = Request.Builder().url(url).build()
         val client = OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
             .build()
 
-        client.newCall(req).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                Log.e("MapsFragment", "Nearby search failed", e)
+        // 3) Fire asynchronously
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("MapsActivity", "Nearby search failed", e)
             }
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                response.body?.string()?.let { body ->
-                    val resp = Gson().fromJson(body, NearbySearchResponse::class.java)
+
+            override fun onResponse(call: Call, response: Response) {
+                response.body?.string()?.let { bodyStr ->
+                    val resp = Gson().fromJson(bodyStr, NearbySearchResponse::class.java)
                     if (resp.status == "OK") {
                         activity?.runOnUiThread {
+                            // clear old pins
                             mMap.clear()
-                            resp.results.forEach { r ->
-                                val bmp = BitmapFactory.decodeResource(
-                                    resources, R.drawable.coffee_pin
-                                ).scale(80, 80, false)
+                            for (r in resp.results) {
+                                val original = BitmapFactory.decodeResource(resources, R.drawable.coffee_pin)
+                                val scaled = original.scale(80, 80, false)
+
                                 val ll = LatLng(r.geometry.location.lat, r.geometry.location.lng)
                                 mMap.addMarker(
                                     MarkerOptions()
                                         .position(ll)
                                         .title(r.name)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(bmp))
+                                        .icon(BitmapDescriptorFactory.fromBitmap(scaled))
                                 )
                             }
                         }
                     } else {
-                        Log.w("MapsFragment", "Places returned ${resp.status}")
+                        Log.w("MapsActivity", "Places API returned ${resp.status}")
                     }
                 }
             }
@@ -203,76 +212,96 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private fun performAutocomplete(query: String) {
         val center = userCenter ?: return
         val delta = 0.01
-        val bias = RectangularBounds.newInstance(
+        val bounds = RectangularBounds.newInstance(
             LatLng(center.latitude - delta, center.longitude - delta),
             LatLng(center.latitude + delta, center.longitude + delta)
         )
+
         val token = AutocompleteSessionToken.newInstance()
-        val req = FindAutocompletePredictionsRequest.builder()
+        val request = FindAutocompletePredictionsRequest.builder()
             .setSessionToken(token)
             .setTypeFilter(TypeFilter.ESTABLISHMENT)
-            .setLocationBias(bias)
             .setQuery(query)
+            .setLocationBias(bounds)
             .build()
 
-        placesClient.findAutocompletePredictions(req)
+        placesClient.findAutocompletePredictions(request)
             .addOnSuccessListener { resp ->
+                // pass both the raw predictions and the session token
                 suggestionAdapter.submitList(resp.autocompletePredictions, token)
-                bindingMaps.rvSearchResults.isVisible = resp.autocompletePredictions.isNotEmpty()
+                binding.rvSearchResults.isVisible = resp.autocompletePredictions.isNotEmpty()
             }
-            .addOnFailureListener { e -> Log.e("MapsFragment", "Autocomplete failed", e) }
+            .addOnFailureListener { e ->
+                Log.e("MapsActivity", "Autocomplete failed", e)
+            }
     }
 
-    private fun onSuggestionClicked(pred: AutocompletePrediction, token: AutocompleteSessionToken) {
-        // stop watcher & hide list
-        bindingMaps.etSearch.removeTextChangedListener(searchWatcher)
-        bindingMaps.rvSearchResults.isGone = true
+    fun onSuggestionClicked(prediction: AutocompletePrediction, token: AutocompleteSessionToken) {
+        // 1) Temporarily stop reacting to text changes
+        binding.etSearch.removeTextChangedListener(searchWatcher)
 
-        // set text & hide keyboard
-        bindingMaps.etSearch.setText(pred.getPrimaryText(null))
-        bindingMaps.etSearch.clearFocus()
-        (requireContext().getSystemService(InputMethodManager::class.java))
-            .hideSoftInputFromWindow(bindingMaps.etSearch.windowToken, 0)
+        // 2) Hide the suggestions list immediately
+        binding.rvSearchResults.isGone = true
 
-        // re-attach watcher
-        bindingMaps.etSearch.addTextChangedListener(searchWatcher)
+        // 3) Populate the field with just the name & clear focus
+        binding.etSearch.setText(prediction.getPrimaryText(null))
+        binding.etSearch.clearFocus()
 
-        // fetch details + drop red pin
-        val req = FetchPlaceRequest.builder(
-            pred.placeId, listOf(Place.Field.LAT_LNG, Place.Field.NAME)
-        ).setSessionToken(token).build()
+        // 4) Hide the keyboard
+        val imm = requireActivity().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
 
-        placesClient.fetchPlace(req)
+        // 5) Re-attach your text watcher
+        binding.etSearch.addTextChangedListener(searchWatcher)
+
+        // 6) Now fetch the place’s full details and drop a marker
+        val placeReq = FetchPlaceRequest.builder(
+            prediction.placeId,
+            listOf(Place.Field.LAT_LNG, Place.Field.NAME)
+        )
+            .setSessionToken(token)
+            .build()
+
+        placesClient.fetchPlace(placeReq)
             .addOnSuccessListener { resp ->
                 val ll = resp.place.latLng!!
-                mMap.addMarker(MarkerOptions().position(ll).title(resp.place.name))
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, 15f))
+                mMap.addMarker(
+                    MarkerOptions()
+                        .position(LatLng(ll.latitude, ll.longitude))
+                        .title(resp.place.name)
+                )
+                mMap.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(LatLng(ll.latitude, ll.longitude), 15f)
+                )
             }
     }
 
-    private fun retrieveApiKey(): String {
+    // ------------------------------- Backend: APIs, Permissions ------------------------------- //
+    private fun retrieveApiKeyFromManifest(): String {
         val ai = requireActivity().packageManager
-            .getApplicationInfo(requireActivity().packageName, PackageManager.GET_META_DATA)
-        return ai.metaData.getString("com.google.android.geo.API_KEY")
-            ?: error("Missing Maps API key")
+            .getApplicationInfo(
+                requireActivity().packageName,
+                PackageManager.GET_META_DATA)
+        return ai.metaData
+            .getString("com.google.android.geo.API_KEY")
+            ?: error("Maps API key missing from manifest!")
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, results: IntArray
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
-        super.onRequestPermissionsResult(requestCode, permissions, results)
-        if (requestCode == REQUEST_LOCATION_PERMISSION
-            && results.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_LOCATION_PERMISSION &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
-            enableLocationAndSearch()
+            // user just granted permission — set up location
+            enableLocationAndCenterMap()
         } else {
-            Toast.makeText(requireContext(),
-                "Location permission required", Toast.LENGTH_SHORT).show()
+            // permission denied — you could show a message or fallback
+            Toast.makeText(requireActivity(), "Location permission required to show your position", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
