@@ -82,6 +82,8 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        binding.bottomNav.selectedItemId = R.id.nav_search
+
         // 1) Initialize Location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 

@@ -1,5 +1,7 @@
 package com.choi.cafelogger.ui.upload
 
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,10 +9,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.widget.FrameLayout
+import android.widget.ImageView
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.choi.cafelogger.R
 
 class UploadFragment : Fragment() {
+
+    private var selectedImageUri: Uri? = null
+    private val pickPhoto = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            selectedImageUri = uri
+            view?.findViewById<ImageView>(R.id.ivUploadIcon)?.apply {
+                setImageURI(uri)
+                imageTintList = null
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
+        }
+    }
+    private val prefs by lazy {
+        requireContext().getSharedPreferences("cafelogger_local", Context.MODE_PRIVATE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,6 +74,15 @@ class UploadFragment : Fragment() {
         actvRoast.setOnClickListener { actvRoast.showDropDown() }
         actvBeverageStyle.setOnClickListener { actvBeverageStyle.showDropDown() }
 
-        // …and any other view logic you had in your Activity
+        // Image upload setup
+        val uploadArea = view.findViewById<FrameLayout>(R.id.flImageUpload)
+        uploadArea.setOnClickListener {
+            pickPhoto.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+        view.findViewById<ImageView>(R.id.ivUploadIcon)?.setOnClickListener {
+            uploadArea.performClick()
+        }
     }
 }

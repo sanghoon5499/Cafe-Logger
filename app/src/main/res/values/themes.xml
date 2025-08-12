@@ -2,31 +2,36 @@
     <!-- Base application theme. -->
     <style name="Theme.CafeLogger" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">#FF914D</item>
+        <item name="colorOnPrimary">#FFD93D</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">#4CCD6E</item>
+        <item name="colorSecondaryVariant">#3DCFD3</item>
+        <item name="colorOnSecondary">#4B7BFF</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">@color/white</item>
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.CafeLogger.NoActionBar"
-        parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.CafeLogger.NoActionBar">
         <!-- Hide the ActionBar -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <!-- make status bar transparent so content can draw behind it -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <!-- dark icons/text in status bar (since your bar is light) -->
-        <item name="android:windowLightStatusBar">true</item>
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/black</item>            <!-- Text above text input -->
+        <item name="colorPrimaryVariant">#FF914D</item>
+        <item name="colorOnPrimary">#FFD93D</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#4CCD6E</item>
+        <item name="colorSecondaryVariant">#3DCFD3</item>
+        <item name="colorOnSecondary">#4B7BFF</item>
+
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">@color/white</item>
+
+        <!-- <item name="android:statusBarColor">#FF4B4B</item>   not working? -->
     </style>
 
-    <style name="Theme.CafeLogger.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.CafeLogger.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

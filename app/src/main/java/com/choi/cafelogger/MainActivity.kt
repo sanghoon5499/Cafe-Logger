@@ -3,6 +3,7 @@ package com.choi.cafelogger
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.choi.cafelogger.databinding.ActivityMainBinding
 import com.choi.cafelogger.ui.home.HomeFragment
 

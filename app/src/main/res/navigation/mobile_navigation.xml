@@ -22,6 +22,6 @@
         android:id="@+id/nav_upload"
         android:name="com.choi.cafelogger.ui.upload.UploadFragment"
         android:label="Upload"
-        tools:layout="@layout/fragment_upload" />/>
+        tools:layout="@layout/fragment_upload" />
 
 </navigation>

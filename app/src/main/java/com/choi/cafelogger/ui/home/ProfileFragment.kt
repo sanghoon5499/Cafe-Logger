@@ -1,4 +1,6 @@
 package com.choi.cafelogger.ui.home
 
-class ProfileFragment {
+import androidx.fragment.app.Fragment
+
+class ProfileFragment: Fragment() {
 }

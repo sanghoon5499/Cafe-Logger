@@ -2,15 +2,35 @@
     <!-- Base application theme. -->
     <style name="Theme.CafeLogger" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">#FF914D</item>
+        <item name="colorOnPrimary">#FFD93D</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">#4CCD6E</item>
+        <item name="colorSecondaryVariant">#3DCFD3</item>
+        <item name="colorOnSecondary">#4B7BFF</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">#A366FF</item>
         <!-- Customize your theme here. -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
+    <style name="Theme.CafeLogger.NoActionBar">
+        <!-- Hide the ActionBar -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">#FF914D</item>
+        <item name="colorOnPrimary">#FFD93D</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#4CCD6E</item>
+        <item name="colorSecondaryVariant">#3DCFD3</item>
+        <item name="colorOnSecondary">#4B7BFF</item>
+
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 </resources>
