@@ -24,6 +24,9 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.bottomNav.selectedItemId = R.id.nav_home
+
+        // .addToBackStack(null) exists to allow the user to press "back" to exit
         binding.btnOpenMap.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, MapsFragment())
@@ -35,9 +38,34 @@ class HomeFragment : Fragment() {
             parentFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, UploadFragment())
-                .addToBackStack(null)   // so the user can “Back” to HomeFragment
+                .addToBackStack(null)
                 .commit()
         }
+
+        binding.bottomNav.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_home -> {
+                    // already on home, no‐op
+                    true
+                }
+                R.id.nav_search -> {
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, MapsFragment())
+                        .addToBackStack(null)
+                        .commit()
+                    true
+                }
+                R.id.nav_profile -> {
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, ProfileFragment())
+                        .addToBackStack(null)
+                        .commit()
+                    true
+                }
+                else -> false
+            }
+        }
+
     }
 
     override fun onDestroyView() {
