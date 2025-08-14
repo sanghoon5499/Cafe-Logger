@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@android:color/white">
 
     <!-- Main vertical stack (with bottom padding so content isn't hidden under the nav) -->
@@ -156,16 +156,20 @@
                 android:textColor="@color/black"
                 android:textSize="19sp"
                 android:paddingBottom="8dp"/>
-
-            <!-- 4. Recent grid -->
-<!--            <androidx.recyclerview.widget.RecyclerView-->
-<!--                android:id="@+id/recentRecycler"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="0dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:padding="16dp"-->
-<!--                android:clipToPadding="false"/>-->
         </LinearLayout>
+
+        <!-- 4. Recent grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="16dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/item_recent_upload"
+            tools:itemCount="6" />
     </LinearLayout>
 
     <!-- 5. Bottom navigation bar -->

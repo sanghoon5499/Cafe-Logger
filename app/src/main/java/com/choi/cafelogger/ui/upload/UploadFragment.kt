@@ -1,6 +1,7 @@
 package com.choi.cafelogger.ui.upload
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -9,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
@@ -30,6 +30,16 @@ class UploadFragment : Fragment() {
     ) { uri: Uri? ->
         if (uri != null) {
             selectedImageUri = uri
+
+            try {
+                requireContext().contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (e: SecurityException) {
+                Log.e("cafeloggerDEBUG", "Failed to persist URI permission: ${e.message}")
+            }
+
             view?.findViewById<ImageView>(R.id.ivUploadIcon)?.apply {
                 setImageURI(uri)
                 imageTintList = null
@@ -37,22 +47,16 @@ class UploadFragment : Fragment() {
             }
         }
     }
+
     private val prefs by lazy {
-        requireContext().getSharedPreferences("cafelogger_local", Context.MODE_PRIVATE)
+        requireContext().getSharedPreferences("cafelogger_prefs", Context.MODE_PRIVATE)
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the XML
-        return inflater.inflate(R.layout.fragment_upload, container, false)
-    }
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View = inflater.inflate(R.layout.fragment_upload, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d("cafeloggerDEBUG", "UploadFragment.kt")
-        Log.d("cafeloggerDEBUG", "getAllUploads:${getAllUploads()}")
         super.onViewCreated(view, savedInstanceState)
 
         // dropdown data
@@ -77,12 +81,12 @@ class UploadFragment : Fragment() {
         val uploadIcon        = view.findViewById<ImageView>(R.id.ivUploadIcon)
 
         // setup dropdowns
-        actvType.setAdapter(typeAdapter)
-        actvRoast.setAdapter(roastAdapter)
-        actvBeverageStyle.setAdapter(bevAdapter)
-        actvType.setOnClickListener { actvType.showDropDown() }
-        actvRoast.setOnClickListener { actvRoast.showDropDown() }
-        actvBeverageStyle.setOnClickListener { actvBeverageStyle.showDropDown() }
+        actvType.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, typeOptions))
+        actvRoast.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, roastOptions))
+        actvBeverageStyle.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, bevOptions))
+        listOf(actvType, actvRoast, actvBeverageStyle).forEach {
+            it.setOnClickListener { v -> (v as AutoCompleteTextView).showDropDown() }
+        }
 
         // open photo picker
         uploadArea.setOnClickListener {
@@ -120,12 +124,5 @@ class UploadFragment : Fragment() {
         }
         array.put(entry)
         prefs.edit() { putString(key, array.toString()) }
-    }
-
-    // (Optional) helper to read everything back later
-    fun getAllUploads(): JSONArray {
-        val key = "uploads_json"
-        val existing = prefs.getString(key, "[]") ?: "[]"
-        return try { JSONArray(existing) } catch (_: Exception) { JSONArray() }
     }
 }
