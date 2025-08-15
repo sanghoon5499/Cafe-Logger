@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.json.JSONArray
 import org.json.JSONObject
+import androidx.core.content.edit
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -22,7 +23,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         _allUploads.value = readFromPrefs().sortedByDescending { it.timestamp }
     }
 
-    fun getAllUploadsJsonArray(): JSONArray {
+    private fun getAllUploadsJsonArray(): JSONArray {
         val existing = prefs.getString(key, "[]")
         return try { JSONArray(existing) } catch (_: Exception) { JSONArray() }
     }
@@ -58,12 +59,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             put("drinkStyle", item.drinkStyle)
             put("imageUri", item.imageUri)
         })
-        prefs.edit().putString(key, arr.toString()).apply()
+        prefs.edit() { putString(key, arr.toString()) }
         refresh()
     }
 
     fun clearAll() {
-        prefs.edit().putString(key, "[]").apply()
+        prefs.edit() { putString(key, "[]") }
         refresh()
     }
 }

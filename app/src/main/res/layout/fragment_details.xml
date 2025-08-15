@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Details"
+                android:text="@string/details"
                 android:textSize="22sp"
                 android:textColor="@color/black"
                 android:layout_marginBottom="16dp"/>
@@ -73,7 +73,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.7"
-                    android:text="Type"
+                    android:text="@string/type"
                     android:textSize="16sp"
                     android:textColor="@color/black" />
 
@@ -109,7 +109,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.7"
-                    android:text="Location"
+                    android:text="@string/location"
                     android:textSize="16sp"
                     android:textColor="@color/black" />
 
@@ -145,7 +145,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.7"
-                    android:text="Roast Level"
+                    android:text="@string/roast_level"
                     android:textSize="16sp"
                     android:textColor="@color/black" />
 
@@ -181,7 +181,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.7"
-                    android:text="Origin"
+                    android:text="@string/origin"
                     android:textSize="16sp"
                     android:textColor="@color/black" />
 
@@ -217,7 +217,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.7"
-                    android:text="Process"
+                    android:text="@string/process"
                     android:textSize="16sp"
                     android:textColor="@color/black" />
 

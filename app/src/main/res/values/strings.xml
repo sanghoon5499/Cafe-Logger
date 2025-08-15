@@ -7,9 +7,59 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="cafelogger">CafeLogger</string>
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
+
+
+    <!--  Home page  -->
+    <string name="waterloo_on">Waterloo, ON</string>
+    <string name="ready_for_a_drink">Ready for a drink?</string>
+    <string name="find_a_cafe">Find a cafe</string>
+    <string name="lattes_beans_etc">Lattes, beans, etc</string>
+    <string name="recent">Recent</string>
+
+
+    <!--  Maps page  -->
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="search_cafes">Search cafes…</string>
+    <string name="search">Search</string>
+
+
+    <!--  Upload page  -->
     <string name="title_upload_activity">UploadActivity</string>
+    <string name="upload_page_title">Found something noteworthy?</string>
+
+    <string name="location_upload">Location*</string>
+    <string name="location_hint">Enter an address or the cafe’s name</string>
+
+    <string name="type_upload">Type*</string>
+    <string name="type_hint">Beans, Latte…</string>
+
+    <string name="roast_level">Roast Level</string>
+    <string name="roast_hint">Light, Medium…</string>
+
+    <string name="origin">Origin</string>
+    <string name="origin_hint">Where were the beans harvested?</string>
+
+    <string name="process">Process</string>
+    <string name="process_hint">Any fermentation process?</string>
+
+    <string name="details">Details</string>
+    <string name="type">Type</string>
+
+    <string name="upload_an_image">Upload an Image*</string>
+
+
+    <!--  Global  -->
+    <string name="upload">Upload</string>
+
+
+    <!--  Details  -->
+    <string name="location">Location</string>
+
+
+    <!--  Other  -->
+    <string name="content_description">content description</string>
 </resources>

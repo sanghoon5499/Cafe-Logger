@@ -1,6 +1,5 @@
 package com.choi.cafelogger.ui.detail
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +10,7 @@ import coil.load
 import com.choi.cafelogger.R
 import com.choi.cafelogger.databinding.FragmentDetailsBinding
 import com.choi.cafelogger.model.UploadItem
+import androidx.core.net.toUri
 
 class DetailFragment : Fragment() {
 
@@ -38,7 +38,7 @@ class DetailFragment : Fragment() {
         }
 
         // Image
-        val uri = upload.imageUri?.let { Uri.parse(it) }
+        val uri = upload.imageUri?.toUri()
         binding.imgDetailThumb.load(uri) {
             crossfade(true)
             placeholder(R.drawable.image_1)
