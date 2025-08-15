@@ -1,7 +1,6 @@
 package com.choi.cafelogger.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,8 @@ import com.choi.cafelogger.R
 import com.choi.cafelogger.ui.upload.UploadFragment
 import com.choi.cafelogger.ui.maps.MapsFragment
 import com.choi.cafelogger.databinding.FragmentHomeBinding
+import com.choi.cafelogger.model.HomeViewModel
+import com.choi.cafelogger.ui.detail.DetailFragment
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -55,8 +56,12 @@ class HomeFragment : Fragment() {
         }
 
         val adapter = RecentAdapter { item ->
-            // Open a details screen where
-//            Log.d("cafeloggerDEBUG", "Clicked: ${item.location}")
+            val fragment = DetailFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable("upload", item)
+                }
+            }
+            navigateTo(fragment)
         }
 
         binding.recentRecycler.adapter = adapter

@@ -1,14 +1,12 @@
-package com.choi.cafelogger.ui.home
+package com.choi.cafelogger.model
 
 import android.app.Application
-import android.util.Log
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.json.JSONArray
 import org.json.JSONObject
-import com.choi.cafelogger.model.UploadItem
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
 

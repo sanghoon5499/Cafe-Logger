@@ -92,7 +92,7 @@
                         android:id="@+id/actvType"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Beans, Beverage..."
+                        android:hint="Beans, Latte..."
                         android:inputType="none"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -199,39 +199,6 @@
                     android:hint="Any fermentation process?"
                     android:inputType="text|textNoSuggestions"
                     android:privateImeOptions="noPersonalizedLearning"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-
-        <!-- Drink Style dropdown -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
-
-            <!-- Static “Drink Style” label -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Drink Style"
-                android:textColor="@color/black"
-                android:textSize="19sp"
-                android:paddingBottom="4dp"/>
-
-            <!-- Exposed dropdown -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:boxStrokeColor="@color/black"
-                app:endIconMode="dropdown_menu">
-
-                <AutoCompleteTextView
-                    android:id="@+id/actvBeverageStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Latte, pour over, espresso…"
-                    android:inputType="none"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 

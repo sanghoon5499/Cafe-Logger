@@ -72,19 +72,16 @@ class UploadFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // dropdown data
-        val typeOptions  = listOf("Beans", "Beverage", "Other")
         val roastOptions = listOf("Light", "Medium-Light", "Medium", "Medium-Dark", "Dark")
-        val bevOptions   = listOf("Latte", "Pour over", "Cappuccino", "Cortado", "Espresso", "Macchiato", "Americano")
+        val typeOptions   = listOf("Beans", "Latte", "Pour over", "Cappuccino", "Cortado", "Espresso", "Macchiato", "Americano", "Other")
 
         // adapters
         val typeAdapter  = ArrayAdapter(requireContext(), R.layout.dropdown_item, typeOptions)
         val roastAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, roastOptions)
-        val bevAdapter   = ArrayAdapter(requireContext(), R.layout.dropdown_item, bevOptions)
 
         // views
         val actvType          = view.findViewById<AutoCompleteTextView>(R.id.actvType)
         val actvRoast         = view.findViewById<AutoCompleteTextView>(R.id.actvRoast)
-        val actvBeverageStyle = view.findViewById<AutoCompleteTextView>(R.id.actvBeverageStyle)
         val etLocation        = view.findViewById<TextInputEditText>(R.id.etLocation)
         val etOrigin          = view.findViewById<TextInputEditText>(R.id.etOrigin)
         val etProcess         = view.findViewById<TextInputEditText>(R.id.etProcess)
@@ -95,8 +92,7 @@ class UploadFragment : Fragment() {
         // setup dropdowns
         actvType.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, typeOptions))
         actvRoast.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, roastOptions))
-        actvBeverageStyle.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, bevOptions))
-        listOf(actvType, actvRoast, actvBeverageStyle).forEach {
+        listOf(actvType, actvRoast).forEach {
             it.setOnClickListener { v -> (v as AutoCompleteTextView).showDropDown() }
         }
 
@@ -115,7 +111,6 @@ class UploadFragment : Fragment() {
                 put("roast", actvRoast.text?.toString()?.trim().orEmpty())
                 put("origin", etOrigin.text?.toString()?.trim().orEmpty())
                 put("process", etProcess.text?.toString()?.trim().orEmpty())
-                put("drinkStyle", actvBeverageStyle.text?.toString()?.trim().orEmpty())
                 put("imageUri", selectedImageUri?.toString().orEmpty())
             }
 

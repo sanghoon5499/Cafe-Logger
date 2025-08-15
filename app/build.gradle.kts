@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
 //    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("kotlin-parcelize")
 }
 
 val MAPS_API_KEY: String by project
