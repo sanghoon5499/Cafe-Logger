@@ -1,5 +1,9 @@
 package com.choi.cafelogger.model
 
+import kotlinx.parcelize.Parcelize
+import android.os.Parcelable
+
+@Parcelize
 data class UploadItem(
     val timestamp: Long,
     val location: String?,
@@ -9,4 +13,4 @@ data class UploadItem(
     val process: String?,
     val drinkStyle: String?,
     val imageUri: String?
-)
+) : Parcelable
