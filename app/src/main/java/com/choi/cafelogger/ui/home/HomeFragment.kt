@@ -52,6 +52,10 @@ class HomeFragment : Fragment() {
 
         binding.recentRecycler.adapter = adapter
 
+        parentFragmentManager.setFragmentResultListener("upload_success", viewLifecycleOwner) { _, _ ->
+            viewModel.refresh()
+        }
+
         viewModel.allUploads.observe(viewLifecycleOwner) { list ->
             adapter.submitList(list.take(6))
         }

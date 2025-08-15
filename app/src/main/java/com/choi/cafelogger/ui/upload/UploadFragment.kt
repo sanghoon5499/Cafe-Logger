@@ -109,8 +109,10 @@ class UploadFragment : Fragment() {
 
             appendUpload(json)
 
+            parentFragmentManager.setFragmentResult("upload_success", Bundle())
+            parentFragmentManager.popBackStack()
+
             Toast.makeText(requireContext(), "Saved locally", Toast.LENGTH_SHORT).show()
-//            clearForm(etLocation, actvType, actvRoast, etOrigin, etProcess, actvBeverageStyle)
         }
     }
 
