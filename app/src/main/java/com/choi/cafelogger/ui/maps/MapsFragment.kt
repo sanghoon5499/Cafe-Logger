@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.location.Location
 import android.os.Bundle
-import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
@@ -72,6 +71,18 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentMapsBinding? = null
     private val binding get() = _binding!!
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = com.google.android.material.transition.platform.MaterialSharedAxis(
+            com.google.android.material.transition.platform.MaterialSharedAxis.X, /* forward = */ true
+        )
+
+        returnTransition = com.google.android.material.transition.platform.MaterialSharedAxis(
+            com.google.android.material.transition.platform.MaterialSharedAxis.X, /* forward = */ false
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -81,8 +92,6 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-//        binding.bottomNav.selectedItemId = R.id.nav_search
 
         // 1) Initialize Location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())

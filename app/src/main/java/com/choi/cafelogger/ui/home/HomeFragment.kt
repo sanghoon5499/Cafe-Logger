@@ -17,6 +17,15 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: HomeViewModel by viewModels()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // When coming back *to* HomeFragment (i.e. popping from UploadFragment)
+        reenterTransition = com.google.android.material.transition.platform.MaterialSharedAxis(
+            com.google.android.material.transition.platform.MaterialSharedAxis.X, /* forward = */ false
+        )
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
