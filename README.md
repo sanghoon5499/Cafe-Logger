@@ -11,15 +11,15 @@ The following is a Figma mockup for the app (UI design isn't my strong suit :sob
 
 Once the user uploads something, the recents grid automatically updates to show the new item - tapping on a tile brings up the details page.
 
-## Example Usage
+## Example Usage\
+![image of the app UI in Figma](https://github.com/sanghoon5499/Cafe-Logger/blob/main/readme_files/usage.JPG)
 
 
 ## Getting Started
 
 ### Dependencies
-ANDROID:
-minSdk = 24
-targetSdk = 35
+- minSdk = 24
+- targetSdk = 35
 
 ### Installing
 
