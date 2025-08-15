@@ -1,7 +1,5 @@
 package com.choi.cafelogger.ui.home
 
-import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.choi.cafelogger.R
 import com.choi.cafelogger.model.UploadItem
+import androidx.core.net.toUri
 
 class RecentAdapter(
     private val onClick: (UploadItem) -> Unit
@@ -28,7 +27,7 @@ class RecentAdapter(
         private val caption: TextView = itemView.findViewById(R.id.tvCaption)
 
         fun bind(item: UploadItem) {
-            val uri = item.imageUri?.let { Uri.parse(it) }
+            val uri = item.imageUri?.toUri()
 
             img.load(uri) {
                 crossfade(true)

@@ -16,7 +16,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:titleTextColor="@android:color/white"
-        android:title="CafeLogger" />
+        android:title="@string/cafelogger" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

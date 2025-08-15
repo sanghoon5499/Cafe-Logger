@@ -18,7 +18,7 @@
             android:id="@+id/tvUploadHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Found something noteworthy?"
+            android:text="@string/upload_page_title"
             android:textAlignment="center"
             android:textSize="30sp"
             android:textColor="@color/black"
@@ -35,7 +35,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Location*"
+            android:text="@string/location_upload"
             android:textColor="@color/black"
             android:textSize="19sp"
             android:paddingBottom="8dp"/>
@@ -53,7 +53,7 @@
                 android:id="@+id/etLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter an address or the café’s name"
+                android:hint="@string/location_hint"
                 android:inputType="textPostalAddress|textNoSuggestions"
                 android:privateImeOptions="noPersonalizedLearning"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -76,7 +76,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Type*"
+                    android:text="@string/type_upload"
                     android:textColor="@color/black"
                     android:textSize="19sp"
                     android:paddingBottom="4dp"/>
@@ -94,7 +94,7 @@
                         android:id="@+id/actvType"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Beans, Latte..."
+                        android:hint="@string/type_hint"
                         android:inputType="none"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -115,7 +115,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Roast Level"
+                    android:text="@string/roast_level"
                     android:textColor="@color/black"
                     android:textSize="19sp"
                     android:paddingBottom="4dp"/>
@@ -132,7 +132,7 @@
                         android:id="@+id/actvRoast"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Light, Medium…"
+                        android:hint="@string/roast_hint"
                         android:inputType="none"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -149,7 +149,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Origin"
+                android:text="@string/origin"
                 android:textColor="@color/black"
                 android:textSize="19sp"
                 android:paddingBottom="4dp"/>
@@ -165,7 +165,7 @@
                     android:id="@+id/etOrigin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Where were the beans harvested?"
+                    android:hint="@string/origin_hint"
                     android:inputType="text|textNoSuggestions"
                     android:privateImeOptions="noPersonalizedLearning"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -182,7 +182,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Process"
+                android:text="@string/process"
                 android:textColor="@color/black"
                 android:textSize="19sp"
                 android:paddingBottom="4dp"/>
@@ -198,7 +198,7 @@
                     android:id="@+id/etProcess"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Any fermentation process?"
+                    android:hint="@string/process_hint"
                     android:inputType="text|textNoSuggestions"
                     android:privateImeOptions="noPersonalizedLearning"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -213,7 +213,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Upload an Image*"
+                android:text="@string/upload_an_image"
                 android:textColor="@color/black"
                 android:textSize="19sp"
                 android:paddingBottom="10dp"/>
@@ -257,7 +257,7 @@
             android:layout_height="69dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            android:text="Upload"
+            android:text="@string/upload"
             android:backgroundTint="@color/black"
             android:textColor="@android:color/white"
             app:cornerRadius="32dp"/>

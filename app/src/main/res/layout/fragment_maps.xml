@@ -54,7 +54,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:background="@null"
-                android:hint="Search cafes..."
+                android:hint="@string/search_cafes"
                 android:paddingVertical="8dp"
                 android:drawableStart="@drawable/search_1"
                 android:drawablePadding="8dp"
@@ -68,7 +68,7 @@
                 android:layout_width="48dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/filter_1"
-                android:contentDescription="Search"
+                android:contentDescription="@string/search"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/black"/>
         </LinearLayout>
