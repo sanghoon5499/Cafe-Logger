@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.ImageView
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +23,8 @@ import com.google.android.material.textfield.TextInputEditText
 import org.json.JSONArray
 import org.json.JSONObject
 import androidx.core.content.edit
+import androidx.core.widget.addTextChangedListener
+import androidx.core.view.isVisible
 
 class UploadFragment : Fragment() {
 
@@ -43,7 +47,7 @@ class UploadFragment : Fragment() {
             view?.findViewById<ImageView>(R.id.ivUploadIcon)?.apply {
                 setImageURI(uri)
                 imageTintList = null
-                scaleType = ImageView.ScaleType.CENTER_CROP
+                scaleType = ImageView.ScaleType.FIT_CENTER
             }
         }
     }
@@ -75,10 +79,6 @@ class UploadFragment : Fragment() {
         val roastOptions = listOf("Light", "Medium-Light", "Medium", "Medium-Dark", "Dark")
         val typeOptions   = listOf("Beans", "Latte", "Pour over", "Cappuccino", "Cortado", "Espresso", "Macchiato", "Americano", "Other")
 
-        // adapters
-        val typeAdapter  = ArrayAdapter(requireContext(), R.layout.dropdown_item, typeOptions)
-        val roastAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, roastOptions)
-
         // views
         val actvType          = view.findViewById<AutoCompleteTextView>(R.id.actvType)
         val actvRoast         = view.findViewById<AutoCompleteTextView>(R.id.actvRoast)
@@ -88,6 +88,15 @@ class UploadFragment : Fragment() {
         val btnSubmit         = view.findViewById<MaterialButton>(R.id.btnSubmitUpload)
         val uploadArea        = view.findViewById<View>(R.id.flImageUpload)
         val uploadIcon        = view.findViewById<ImageView>(R.id.ivUploadIcon)
+
+        val tilLocation       = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilLocation)
+        val tilType           = view.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.tilType)
+        val tvImageErr        = view.findViewById<TextView>(R.id.tvImageError)
+
+        // Clear errors when user types/selects
+        etLocation.addTextChangedListener { tilLocation.error = null }
+        actvType.setOnItemClickListener { _, _, _, _ -> tilType.error = null }
+        actvType.addTextChangedListener { if (!it.isNullOrBlank()) tilType.error = null }
 
         // setup dropdowns
         actvType.setAdapter(ArrayAdapter(requireContext(), R.layout.dropdown_item, typeOptions))
@@ -104,6 +113,43 @@ class UploadFragment : Fragment() {
 
         // submit -> collect -> JSON -> save/append
         btnSubmit.setOnClickListener {
+            // 1) Clear previous errors
+            tilLocation.error = null
+            tilType.error = null
+            tvImageErr.visibility = View.GONE
+
+            // 2) Validate
+            var hasError = false
+
+            val location = etLocation.text?.toString()?.trim().orEmpty()
+            val type     = actvType.text?.toString()?.trim().orEmpty()
+            val imageOk  = selectedImageUri != null
+
+            if (location.isBlank()) {
+                tilLocation.error = "Required"
+                if (!hasError) etLocation.requestFocus()
+                hasError = true
+            }
+
+            if (type.isBlank()) {
+                tilType.error = "Required"
+                if (!hasError) actvType.requestFocus()
+                hasError = true
+            }
+
+            if (!imageOk) {
+                tvImageErr.text = "An image is required"
+                tvImageErr.visibility = View.VISIBLE
+                if (!hasError) uploadArea.requestFocus()
+                hasError = true
+            }
+
+            if (hasError) {
+                // Optionally scroll to the first error
+                view.findViewById<ScrollView>(R.id.scrollUpload)?.smoothScrollTo(0, findTopOfFirstError(tilLocation, tilType, tvImageErr))
+                return@setOnClickListener
+            }
+
             val json = JSONObject().apply {
                 put("timestamp", System.currentTimeMillis())
                 put("location", etLocation.text?.toString()?.trim().orEmpty())
@@ -115,7 +161,6 @@ class UploadFragment : Fragment() {
             }
 
             appendUpload(json)
-
             parentFragmentManager.setFragmentResult("upload_success", Bundle())
             parentFragmentManager.popBackStack()
 
@@ -133,5 +178,17 @@ class UploadFragment : Fragment() {
         }
         array.put(entry)
         prefs.edit() { putString(key, array.toString()) }
+    }
+
+    private fun findTopOfFirstError(vararg views: View): Int {
+        return views
+            .filter { v ->
+                when (v) {
+                    is com.google.android.material.textfield.TextInputLayout -> !v.error.isNullOrBlank()
+                    is TextView -> v.isVisible && v.text.isNotBlank()
+                    else -> false
+                }
+            }
+            .minOfOrNull { it.top } ?: 0
     }
 }
