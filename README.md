@@ -23,7 +23,7 @@ Once the user uploads something, the recents grid automatically updates to show 
 
 ### Installing
 
-* Will update once a live build is on Firebase or similar.
+* Will update once a live build is on Firebase App dist.
 
 ## Help
 
