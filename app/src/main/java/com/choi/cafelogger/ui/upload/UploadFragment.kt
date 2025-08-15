@@ -52,6 +52,18 @@ class UploadFragment : Fragment() {
         requireContext().getSharedPreferences("cafelogger_prefs", Context.MODE_PRIVATE)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = com.google.android.material.transition.platform.MaterialSharedAxis(
+            com.google.android.material.transition.platform.MaterialSharedAxis.X, /* forward = */ true
+        )
+
+        returnTransition = com.google.android.material.transition.platform.MaterialSharedAxis(
+            com.google.android.material.transition.platform.MaterialSharedAxis.X, /* forward = */ false
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_upload, container, false)
