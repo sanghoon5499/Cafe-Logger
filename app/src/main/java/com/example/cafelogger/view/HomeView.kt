@@ -1,28 +1,44 @@
 package com.example.cafelogger.view
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.example.cafelogger.viewmodel.HomeViewModel
 import com.example.cafelogger.viewmodel.ViewModelFactory
 
@@ -32,35 +48,77 @@ fun HomeView(
     homeViewModel: HomeViewModel
 ) {
     val recents by homeViewModel.recents.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // This effect runs when the composable enters the screen
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            // If the screen is resuming (coming into focus), reload the data
+            if (event == Lifecycle.Event.ON_RESUME) {
+                homeViewModel.loadRecents()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // Column that contains all elements
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+
         // Header
         Column(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Profile picture")
-            Text(text = "Ready for a drink?")
-            Button(onClick = {navController.navigate(Views.MapsView.name)}) {
+            Icon(
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = "user",
+                modifier = Modifier.size(100.dp)
+            )
+            Text(text = "Ready for a drink?",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold)
+            Button(
+                onClick = {navController.navigate(Views.MapsView.name)},
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B20))
+            ) {
                 Text(text = "Find a cafe")
             }
         }
 
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            thickness = 2.dp,
+            color = Color.Black,
+        )
+
+
         // Upload
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-            Text(text = "Upload")
+            Text(text = "Upload",
+                style = MaterialTheme.typography.titleLarge)
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(onClick = {navController.navigate(Views.UploadView.name)}) {
-                    Text(text = "Lattes beans etc")
+                Button(
+                    onClick = {navController.navigate(Views.UploadView.name)},
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B20)),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    Text(text = "Lattes, beans, etc")
                 }
             }
         }
 
         // Recent
+        Column(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
+            Text(text = "Recently Uploaded",
+                style = MaterialTheme.typography.titleLarge)
+        }
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.padding(8.dp),
@@ -69,8 +127,17 @@ fun HomeView(
         ) {
             // The items block defines the content for each cell
             items(recents) { entry ->
-                Card() {
-                    Text(text = entry.location)
+                Card {
+                    Box {
+                        AsyncImage(
+                            model = entry.imageUri,
+                            contentDescription = "Coffee/bean Entry: ${entry.location}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
             }
         }
