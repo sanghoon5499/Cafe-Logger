@@ -13,10 +13,10 @@ class HomeViewModel(private val entryRepository: EntryRepository) : ViewModel() 
     val recents: StateFlow<List<Entry>> = _recents
 
     init {
-        fetchRecents()
+        loadRecents()
     }
 
-    private fun fetchRecents() {
+    fun loadRecents() {
         viewModelScope.launch {
             _recents.value = entryRepository.getEntries()
         }
