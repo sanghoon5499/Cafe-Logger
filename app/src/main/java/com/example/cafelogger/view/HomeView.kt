@@ -12,23 +12,26 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.rememberNavController
+import com.example.cafelogger.viewmodel.HomeViewModel
+import com.example.cafelogger.viewmodel.ViewModelFactory
 
 @Composable
 fun HomeView(
-    navController: NavController
+    navController: NavController,
+    homeViewModel: HomeViewModel
 ) {
-    // PLACEHOLDER
-    val simpleItems = listOf(
-        "Apple", "Banana", "Orange", "Grape", "Strawberry",
-        "Blueberry", "Raspberry", "Pineapple", "Mango", "Watermelon",
-        "Peach", "Plum", "Cherry", "Kiwi", "Lemon"
-    )
+    val recents by homeViewModel.recents.collectAsState()
 
     // Column that contains all elements
     Column(modifier = Modifier.fillMaxSize()) {
@@ -65,9 +68,9 @@ fun HomeView(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // The items block defines the content for each cell
-            items(simpleItems) { item ->
+            items(recents) { entry ->
                 Card() {
-                    Text(text = "Item $item")
+                    Text(text = entry.location)
                 }
             }
         }
@@ -78,6 +81,8 @@ fun HomeView(
 @Preview(showBackground = true)
 fun HomePreview() {
     val navController = rememberNavController()
+    val factory = ViewModelFactory(LocalContext.current)
+    val homeViewModel: HomeViewModel = viewModel(factory = factory)
 
-    HomeView(navController)
+    HomeView(navController, homeViewModel)
 }

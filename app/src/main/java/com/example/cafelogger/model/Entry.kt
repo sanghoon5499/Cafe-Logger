@@ -1,5 +1,8 @@
 package com.example.cafelogger.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Entry (
     val location: String,
     val type: String,
@@ -7,5 +10,6 @@ data class Entry (
     val origin: String,
     val process: String,
     val drinkStyle: String,
-    val imageUri: String?
+    val imageUri: String?,
+    val timestamp: Long
 )
