@@ -55,7 +55,11 @@ import android.Manifest
 import android.content.Context
 import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cafelogger.model.Entry
+import com.example.cafelogger.repository.EntryRepository
+import com.example.cafelogger.viewmodel.UploadViewModel
+import com.example.cafelogger.viewmodel.ViewModelFactory
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -72,14 +76,15 @@ private val RoastOptions = listOf("Light", "Light-Medium", "Medium", "Medium-Dar
 
 @Composable
 fun UploadView(
-    navController: NavController
+    navController: NavController,
+    uploadViewModel: UploadViewModel
 ) {
     var locationText        by remember { mutableStateOf("") }
     var originText          by remember { mutableStateOf("") }
     var processText         by remember { mutableStateOf("") }
-    var selectedType        by remember { mutableStateOf("Beans, drink...") }
-    var selectedDrinkStyle  by remember { mutableStateOf("Latte, pour over, espresso...") }
-    var selectedRoast       by remember { mutableStateOf("Light, Medium...") }
+    var selectedType        by remember { mutableStateOf(typeOptions[0]) }
+    var selectedDrinkStyle  by remember { mutableStateOf(drinkStyleOptions[0]) }
+    var selectedRoast       by remember { mutableStateOf(RoastOptions[0]) }
     var imageBitmap         by remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
 
@@ -151,32 +156,19 @@ fun UploadView(
                     saveBitmapAndGetUri(context, it)
                 }
 
-                val logEntry = Entry(
-                    location = locationText,
-                    origin = originText,
-                    process = processText,
-                    type = selectedType,
-                    drinkStyle = selectedDrinkStyle,
-                    roastLevel = selectedRoast,
-                    imageUri = imageUriString
+                // call the entry repository and throw the json in somewhere
+                uploadViewModel.saveNewEntry(
+                    locationText,
+                    selectedType,
+                    selectedRoast,
+                    originText,
+                    processText,
+                    selectedDrinkStyle,
+                    imageUriString,
+                    System.currentTimeMillis()
                 )
 
-                val gson = Gson()
-                val jsonString = gson.toJson(logEntry)
-
-                Log.d("UploadView", "Serialized JSON: $jsonString")
-
-                try {
-                    val filename = "log_entry_${System.currentTimeMillis()}.json"
-                    context.openFileOutput(filename, Context.MODE_PRIVATE).use {
-                        it.write(jsonString.toByteArray())
-                    }
-                    Log.d("UploadView", "Successfully saved JSON to $filename")
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-
-                navController.navigate(Views.HomeView.name)
+                navController.popBackStack()
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -476,7 +468,7 @@ fun ImageUploadArea(
 
 private fun saveBitmapAndGetUri(context: Context, bitmap: Bitmap): String? {
     val filename = "log_image_${System.currentTimeMillis()}.jpg"
-    val file = File(context.cacheDir, filename)
+    val file = File(context.filesDir, filename)
     return try {
         val stream = FileOutputStream(file)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
@@ -494,6 +486,9 @@ private fun saveBitmapAndGetUri(context: Context, bitmap: Bitmap): String? {
 @Composable
 fun UploadPreview() {
     val navController = rememberNavController()
-    UploadView(navController)
+    val factory = ViewModelFactory(LocalContext.current)
+    val uploadViewModel: UploadViewModel = viewModel(factory = factory)
+
+    UploadView(navController, uploadViewModel)
 }
 
