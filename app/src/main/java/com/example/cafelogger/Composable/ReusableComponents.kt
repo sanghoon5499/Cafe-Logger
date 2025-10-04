@@ -1,4 +1,4 @@
-package com.example.cafelogger.view
+package com.example.cafelogger.Composable
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -12,11 +12,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun Divider() {
+fun Divider(size: Int, thickness: Int, color: Color) {
     HorizontalDivider(
-        modifier = Modifier.padding(vertical = 24.dp),
-        thickness = 2.dp,
-        color = Color.Gray,
+        modifier = Modifier.padding(vertical = size.dp),
+        thickness = thickness.dp,
+        color = color,
     )
 }
 

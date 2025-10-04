@@ -1,15 +1,6 @@
 package com.example.cafelogger.view
 
-import android.graphics.Bitmap
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,11 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -29,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -40,9 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,21 +35,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import android.Manifest
-import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cafelogger.Composable.ImageUploadArea
 import com.example.cafelogger.viewmodel.UploadViewModel
 import com.example.cafelogger.viewmodel.ViewModelFactory
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 private val typeOptions = listOf("Beans", "Drink")
 private val drinkStyleOptions = listOf("Latte", "Cappuccino","Espresso", "Pour Over")
@@ -76,7 +54,6 @@ fun UploadView(
     uploadViewModel: UploadViewModel
 ) {
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
 
     var titleText           by remember { mutableStateOf("") }
     var locationText        by remember { mutableStateOf("") }
@@ -85,7 +62,7 @@ fun UploadView(
     var selectedType        by remember { mutableStateOf(typeOptions[0]) }
     var selectedDrinkStyle  by remember { mutableStateOf(drinkStyleOptions[0]) }
     var selectedRoast       by remember { mutableStateOf(RoastOptions[0]) }
-    var imageBitmap         by remember { mutableStateOf<Bitmap?>(null) }
+    var imageUri            by remember { mutableStateOf<Uri?>(null) }
 
     Column(
         modifier = Modifier
@@ -142,27 +119,25 @@ fun UploadView(
         )
         Spacer(Modifier.height(16.dp))
 
-        // Drink Style
-        DrinkStyleInput(
-            selectedValue = selectedDrinkStyle,
-            onStyleSelected = { selectedDrinkStyle = it }
-        )
+        if (selectedType != "Beans") {
+            DrinkStyleInput(
+                selectedValue = selectedDrinkStyle,
+                onStyleSelected = { selectedDrinkStyle = it }
+            )
+            Spacer(Modifier.height(16.dp))
+        }
         Spacer(Modifier.height(16.dp))
 
         // Upload an Image Area
         ImageUploadArea(
-            imageBitmap = imageBitmap,
-            onImageCaptured = { bitmap -> imageBitmap = bitmap }
+            imageUri = imageUri,
+            onImageCaptured = { uri -> imageUri = uri }
         )
         Spacer(Modifier.height(24.dp))
 
         // Final Upload Button
         Button(
             onClick = {
-                val imageUriString = imageBitmap?.let {
-                    saveBitmapAndGetUri(context, it)
-                }
-
                 // call the entry repository and throw the json in somewhere
                 uploadViewModel.saveNewEntry(
                     titleText,
@@ -171,8 +146,8 @@ fun UploadView(
                     selectedRoast,
                     originText,
                     processText,
-                    selectedDrinkStyle,
-                    imageUriString,
+                    if (selectedType == "Beans") "-" else selectedDrinkStyle,
+                    imageUri?.toString(),
                     System.currentTimeMillis()
                 )
 
@@ -219,7 +194,8 @@ fun Title(
         placeholder = { Text("Name this entry",
             color = Color(0xFFAFB1B6))},
         modifier = Modifier.fillMaxWidth(),
-        singleLine = true
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
     )
 }
 
@@ -238,10 +214,11 @@ fun Location(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text("Enter an address or the cafe's name",
+        placeholder = { Text("Cafe name?",
             color = Color(0xFFAFB1B6))},
         modifier = Modifier.fillMaxWidth(),
-        singleLine = true
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
     )
 }
 
@@ -274,12 +251,13 @@ fun TypeAndRoast(
             ) {
                 OutlinedTextField(
                     value = selectedType,
-                    textStyle = TextStyle(color = Color(0xFF000000)),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFAFB1B6)),
                     onValueChange = {},
                     readOnly = true,
                     singleLine = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isTypeMenuExpanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 ExposedDropdownMenu(
                     expanded = isTypeMenuExpanded,
@@ -315,12 +293,13 @@ fun TypeAndRoast(
             ) {
                 OutlinedTextField(
                     value = selectedRoast,
-                    textStyle = TextStyle(color = Color(0xFF000000)),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFAFB1B6)),
                     onValueChange = {},
                     readOnly = true,
                     singleLine = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isRoastMenuExpanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
                 )
                 ExposedDropdownMenu(
                     expanded = isRoastMenuExpanded,
@@ -356,10 +335,11 @@ fun Origin(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text("Where were the beans harvested?",
+        placeholder = { Text("Harvest country?",
             color = Color(0xFFAFB1B6)) },
         modifier = Modifier.fillMaxWidth(),
-        singleLine = true
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
     )
 }
 
@@ -381,7 +361,8 @@ fun Process(
         placeholder = { Text("Any fermentation process?",
             color = Color(0xFFAFB1B6)) },
         modifier = Modifier.fillMaxWidth(),
-        singleLine = true
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
     )
 }
 
@@ -406,14 +387,15 @@ fun DrinkStyleInput(
         ) {
             OutlinedTextField(
                 value = selectedValue,
-                textStyle = TextStyle(color = Color(0xFF000000)),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFAFB1B6)),
                 onValueChange = {},
                 readOnly = true,
                 singleLine = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDrinkStyleMenuExpanded) },
                 modifier = Modifier
                     .menuAnchor()
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
             ExposedDropdownMenu(
                 expanded = isDrinkStyleMenuExpanded,
@@ -432,85 +414,6 @@ fun DrinkStyleInput(
         }
     }
 }
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun ImageUploadArea(
-    modifier: Modifier = Modifier,
-    imageBitmap: Bitmap?,
-    onImageCaptured: (Bitmap?) -> Unit
-) {
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview(),
-        onResult = { bitmap ->
-            onImageCaptured(bitmap)
-        }
-    )
-    val cameraPermissionState = rememberPermissionState(
-        permission = Manifest.permission.CAMERA
-    )
-
-
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(text = "Upload an Image",
-            color = Color(0xFF61646B),
-            fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(4.dp))
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .clickable {
-                    if (cameraPermissionState.status.isGranted) {
-                        cameraLauncher.launch()
-                    } else {
-                        cameraPermissionState.launchPermissionRequest()
-                    } },
-            contentAlignment = Alignment.Center
-        ) {
-            if (imageBitmap != null) {
-                Image(
-                    bitmap = imageBitmap.asImageBitmap(),
-                    contentDescription = "Captured Image",
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Upload Image",
-                        modifier = Modifier.size(48.dp),
-                        tint = Color.Gray
-                    )
-                }
-            }
-        }
-    }
-}
-
-private fun saveBitmapAndGetUri(context: Context, bitmap: Bitmap): String? {
-    val filename = "log_image_${System.currentTimeMillis()}.jpg"
-    val file = File(context.filesDir, filename)
-    return try {
-        val stream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-        stream.flush()
-        stream.close()
-        Uri.fromFile(file).toString()
-    } catch (e: IOException) {
-        e.printStackTrace()
-        null
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
