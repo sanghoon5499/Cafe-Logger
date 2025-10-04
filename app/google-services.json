@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "745320407319",
+    "project_id": "cafelogger-d96f3",
+    "storage_bucket": "cafelogger-d96f3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745320407319:android:dfbf501a90698b934f1752",
+        "android_client_info": {
+          "package_name": "com.example.cafelogger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJhRB9Pm6Qzl9Rn1C0aAbuM605Eh25cMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
