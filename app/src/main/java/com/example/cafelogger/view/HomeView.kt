@@ -39,13 +39,16 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.example.cafelogger.model.Entry
+import com.example.cafelogger.viewmodel.DetailsViewModel
 import com.example.cafelogger.viewmodel.HomeViewModel
 import com.example.cafelogger.viewmodel.ViewModelFactory
 
 @Composable
 fun HomeView(
     navController: NavController,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    detailsViewModel: DetailsViewModel
 ) {
     val recents by homeViewModel.recents.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -70,7 +73,7 @@ fun HomeView(
 
         // Header
         Column(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier.padding(32.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
@@ -78,15 +81,8 @@ fun HomeView(
                 contentDescription = "user",
                 modifier = Modifier.size(100.dp)
             )
-            Text(text = "Ready for a drink?",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold)
-            Button(
-                onClick = {navController.navigate(Views.MapsView.name)},
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B20))
-            ) {
-                Text(text = "Find a cafe")
-            }
+            Text(text = "Cafe Logger",
+                style = MaterialTheme.typography.headlineSmall)
         }
 
         HorizontalDivider(
@@ -94,7 +90,6 @@ fun HomeView(
             thickness = 2.dp,
             color = Color.Black,
         )
-
 
         // Upload
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
@@ -115,29 +110,38 @@ fun HomeView(
         }
 
         // Recent
-        Column(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp, vertical = 24.dp).fillMaxWidth()) {
             Text(text = "Recently Uploaded",
                 style = MaterialTheme.typography.titleLarge)
         }
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // The items block defines the content for each cell
             items(recents) { entry ->
-                Card {
+                Card(
+                    onClick = {
+                        detailsViewModel.selectEntry(entry)
+                        navController.navigate(Views.DetailsView.name)
+                    }
+                ) {
                     Box {
                         AsyncImage(
                             model = entry.imageUri,
-                            contentDescription = "Coffee/bean Entry: ${entry.location}",
+                            contentDescription = "Coffee/bean Entry: ${entry.title}",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f),
                             contentScale = ContentScale.Crop
                         )
                     }
+                    Text(
+                        text = entry.title,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        )
                 }
             }
         }
@@ -150,6 +154,7 @@ fun HomePreview() {
     val navController = rememberNavController()
     val factory = ViewModelFactory(LocalContext.current)
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
+    val detailsViewModel: DetailsViewModel = viewModel()
 
-    HomeView(navController, homeViewModel)
+    HomeView(navController, homeViewModel, detailsViewModel)
 }

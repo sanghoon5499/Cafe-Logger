@@ -1,7 +1,6 @@
 package com.example.cafelogger.view
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
@@ -54,21 +53,18 @@ import androidx.navigation.compose.rememberNavController
 import android.Manifest
 import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cafelogger.model.Entry
-import com.example.cafelogger.repository.EntryRepository
 import com.example.cafelogger.viewmodel.UploadViewModel
 import com.example.cafelogger.viewmodel.ViewModelFactory
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.gson.Gson
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 private val typeOptions = listOf("Beans", "Drink")
 private val drinkStyleOptions = listOf("Latte", "Cappuccino","Espresso", "Pour Over")
@@ -79,6 +75,10 @@ fun UploadView(
     navController: NavController,
     uploadViewModel: UploadViewModel
 ) {
+    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+
+    var titleText           by remember { mutableStateOf("") }
     var locationText        by remember { mutableStateOf("") }
     var originText          by remember { mutableStateOf("") }
     var processText         by remember { mutableStateOf("") }
@@ -86,16 +86,16 @@ fun UploadView(
     var selectedDrinkStyle  by remember { mutableStateOf(drinkStyleOptions[0]) }
     var selectedRoast       by remember { mutableStateOf(RoastOptions[0]) }
     var imageBitmap         by remember { mutableStateOf<Bitmap?>(null) }
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Title
-        Title()
+        // Page title
+        EntryHeader()
 
         // Horizonal line spacer
         HorizontalDivider(
@@ -104,6 +104,13 @@ fun UploadView(
             color = Color.Black,
         )
         Spacer(Modifier.height(8.dp))
+
+        // Title (name) of entry
+        Title(
+            value = titleText,
+            onValueChange = { newText -> titleText = newText }
+        )
+        Spacer(Modifier.height(16.dp))
 
         // Location
         Location(
@@ -158,6 +165,7 @@ fun UploadView(
 
                 // call the entry repository and throw the json in somewhere
                 uploadViewModel.saveNewEntry(
+                    titleText,
                     locationText,
                     selectedType,
                     selectedRoast,
@@ -182,14 +190,36 @@ fun UploadView(
 }
 
 @Composable
-fun Title() {
+fun EntryHeader() {
     Text(
         text = "Found something noteworthy?",
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
+            .padding(16.dp),
         style = MaterialTheme.typography.titleLarge,
         textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+fun Title(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    Text(
+        text = "Title",
+        modifier = Modifier.fillMaxWidth(),
+        color = Color(0xFF61646B),
+        fontWeight = FontWeight.Bold
+    )
+    Spacer(Modifier.height(4.dp))
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text("Name this entry",
+            color = Color(0xFFAFB1B6))},
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
     )
 }
 
@@ -244,7 +274,7 @@ fun TypeAndRoast(
             ) {
                 OutlinedTextField(
                     value = selectedType,
-                    textStyle = TextStyle(color = Color(0xFFAFB1B6)),
+                    textStyle = TextStyle(color = Color(0xFF000000)),
                     onValueChange = {},
                     readOnly = true,
                     singleLine = true,
@@ -285,7 +315,7 @@ fun TypeAndRoast(
             ) {
                 OutlinedTextField(
                     value = selectedRoast,
-                    textStyle = TextStyle(color = Color(0xFFAFB1B6)),
+                    textStyle = TextStyle(color = Color(0xFF000000)),
                     onValueChange = {},
                     readOnly = true,
                     singleLine = true,
@@ -376,7 +406,7 @@ fun DrinkStyleInput(
         ) {
             OutlinedTextField(
                 value = selectedValue,
-                textStyle = TextStyle(color = Color(0xFFAFB1B6)),
+                textStyle = TextStyle(color = Color(0xFF000000)),
                 onValueChange = {},
                 readOnly = true,
                 singleLine = true,

@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 
 class UploadViewModel(private val entryRepository: EntryRepository) : ViewModel() {
     fun saveNewEntry(
+        title: String,
         location: String,
         type: String,
         roastLevel: String,
@@ -19,6 +20,7 @@ class UploadViewModel(private val entryRepository: EntryRepository) : ViewModel(
     {
         viewModelScope.launch {
             val newEntry = Entry(
+                title = title,
                 location = location,
                 type = type,
                 roastLevel = roastLevel,

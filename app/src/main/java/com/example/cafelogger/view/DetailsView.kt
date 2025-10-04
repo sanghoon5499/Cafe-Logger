@@ -1,29 +1,148 @@
 package com.example.cafelogger.view
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import com.example.cafelogger.model.Entry
+import com.example.cafelogger.viewmodel.DetailsViewModel
 
 @Composable
 fun DetailsView(
-    navController: NavController
+    navController: NavController,
+    detailsViewModel: DetailsViewModel
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "Details")
-        Button(onClick = { navController.navigate(Views.MapsView.name) }) {
-            Text(text = "Maps View")
+    val entry by detailsViewModel.entry.collectAsState()
+    val currentEntry = entry
+
+    if (currentEntry != null) {
+        Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+            BackButton(navController)
+
+            ImageSection(currentEntry)
+
+            Divider()
+
+            InfoSection(currentEntry)
         }
-        Button(onClick = { navController.navigate(Views.HomeView.name) }) {
-            Text(text = "Home View")
-        }
-        Button(onClick = { navController.navigate(Views.UploadView.name) }) {
-            Text(text = "Upload View")
-        }
+    } else {
+        CircularProgressIndicator()
     }
+}
+
+@Composable
+fun BackButton(navController: NavController) {
+    Button(onClick = {navController.popBackStack()},
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A2B20)))
+    {
+        Text("<")
+    }
+}
+
+@Composable
+fun Divider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(vertical = 24.dp),
+        thickness = 2.dp,
+        color = Color.Gray,
+    )
+}
+
+@Composable
+fun ImageSection(currentEntry: Entry) {
+    AsyncImage(
+        model = currentEntry.imageUri,
+        contentDescription = "Coffee/bean Entry: ${currentEntry.title}",
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f),
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+fun InfoSection(currentEntry: Entry) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        ReusableRow("Title", currentEntry.title)
+        ReusableRow("Type", currentEntry.type)
+        ReusableRow("Roast", currentEntry.roastLevel)
+        ReusableRow("Origin", currentEntry.origin)
+        ReusableRow("Process", currentEntry.process)
+    }
+}
+
+
+@Composable
+fun ReusableRow(text: String, parameter: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.weight(0.3f)
+        )
+        OutlinedTextField(
+            value = parameter,
+            onValueChange = {},
+            readOnly = true,
+            textStyle = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(0.7f)
+        )
+    }
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun DetailsViewPreview() {
+    val navController = rememberNavController()
+    val detailsViewModel: DetailsViewModel = viewModel()
+
+    val entry = Entry(
+        title = "Morning Brew",
+        location = "Foundry Coffee Roasters, Waterloo",
+        type = "Drink",
+        roastLevel = "Light-Medium",
+        origin = "Yirgacheffe, Ethiopia",
+        process = "Washed",
+        drinkStyle = "Pour Over",
+        imageUri = "https://picsum.photos/seed/picsum/1200/1600",
+        timestamp = System.currentTimeMillis()
+    )
+
+    detailsViewModel.selectEntry(entry)
+
+    DetailsView(
+        navController,
+        detailsViewModel
+    )
 }
