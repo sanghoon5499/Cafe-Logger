@@ -12,13 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -41,6 +36,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.example.cafelogger.Composable.Divider
 import com.example.cafelogger.R
 import com.example.cafelogger.model.Entry
 import com.example.cafelogger.viewmodel.DetailsViewModel
@@ -74,7 +70,7 @@ fun HomeView(
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Header()
 
-        Divider()
+        Divider(16, 2, Color.Gray)
 
         UploadSection(navController)
 
@@ -85,7 +81,7 @@ fun HomeView(
 @Composable
 fun Header() {
     Column(
-        modifier = Modifier.padding(32.dp).fillMaxWidth(),
+        modifier = Modifier.padding(16.dp).fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -100,7 +96,7 @@ fun Header() {
 
 @Composable
 fun UploadSection(navController: NavController) {
-    Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+    Column(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
         Text(text = "Upload",
             style = MaterialTheme.typography.titleLarge)
         Column(
@@ -123,7 +119,7 @@ fun RecentsSection(recents: List<Entry>,
                    detailsViewModel: DetailsViewModel,
                    navController: NavController)
 {
-    Column(modifier = Modifier.padding(16.dp, vertical = 24.dp).fillMaxWidth()) {
+    Column(modifier = Modifier.padding(8.dp, vertical = 12.dp).fillMaxWidth()) {
         Text(text = "Recently Uploaded",
             style = MaterialTheme.typography.titleLarge)
     }

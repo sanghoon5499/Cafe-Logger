@@ -1,6 +1,9 @@
 package com.example.cafelogger.view
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -28,13 +31,24 @@ fun MainScreen() {
     val uploadViewModel: UploadViewModel = viewModel(factory = factory)
     val detailsViewModel: DetailsViewModel = viewModel()
 
-    NavHost(
-        navController = navController,
-        startDestination = Views.HomeView.name
-    ) {
-        composable(Views.HomeView.name) {HomeView(navController, homeViewModel, detailsViewModel)}
-        composable(Views.UploadView.name) {UploadView(navController, uploadViewModel)}
-        composable(Views.MapsView.name) {MapsView(navController)}
-        composable(Views.DetailsView.name) {DetailsView(navController, detailsViewModel)}
+    Scaffold { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Views.HomeView.name,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(Views.HomeView.name) {
+                HomeView(navController, homeViewModel, detailsViewModel)
+            }
+            composable(Views.UploadView.name) {
+                UploadView(navController, uploadViewModel)
+            }
+            composable(Views.MapsView.name) {
+                MapsView(navController)
+            }
+            composable(Views.DetailsView.name) {
+                DetailsView(navController, detailsViewModel)
+            }
+        }
     }
 }
