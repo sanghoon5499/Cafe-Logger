@@ -65,4 +65,5 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.core.splashscreen)
 }
