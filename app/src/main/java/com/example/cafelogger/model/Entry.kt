@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Entry (
+    val title: String,
     val location: String,
     val type: String,
     val roastLevel: String,
