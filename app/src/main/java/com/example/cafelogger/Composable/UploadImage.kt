@@ -159,5 +159,5 @@ fun ImageUploadArea(
                 }
             }
         )
-        }
+    }
 }

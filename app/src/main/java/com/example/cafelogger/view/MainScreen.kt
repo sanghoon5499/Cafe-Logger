@@ -29,7 +29,7 @@ fun MainScreen() {
 
     val homeViewModel: HomeViewModel = viewModel(factory = factory)
     val uploadViewModel: UploadViewModel = viewModel(factory = factory)
-    val detailsViewModel: DetailsViewModel = viewModel()
+    val detailsViewModel: DetailsViewModel = viewModel(factory = factory)
 
     Scaffold { innerPadding ->
         NavHost(
