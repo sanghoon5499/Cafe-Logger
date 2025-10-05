@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -35,11 +37,17 @@ fun DetailsView(
     navController: NavController,
     detailsViewModel: DetailsViewModel
 ) {
+    val scrollState = rememberScrollState()
     val entry by detailsViewModel.entry.collectAsState()
     val currentEntry = entry
 
     if (currentEntry != null) {
-        Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(scrollState),
+        ) {
             DetailsImageSection(currentEntry)
 
             Divider(24, 2, Color.Gray)
