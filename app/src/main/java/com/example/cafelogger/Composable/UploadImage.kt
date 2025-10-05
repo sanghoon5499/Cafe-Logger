@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +66,7 @@ fun ImageUploadArea(
 ) {
     val context = LocalContext.current
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
@@ -71,6 +74,12 @@ fun ImageUploadArea(
             if (isSuccess) {
                 onImageCaptured(tempImageUri)
             }
+        }
+    )
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            onImageCaptured(uri)
         }
     )
     val cameraPermissionState = rememberPermissionState(
@@ -95,15 +104,7 @@ fun ImageUploadArea(
                 )
                 .clip(RoundedCornerShape(8.dp))
                 .background(Color.White)
-                .clickable {
-                    if (cameraPermissionState.status.isGranted) {
-                        val uriToLaunch = getTmpFileUri(context)
-                        // Create a new URI before launching the camera
-                        tempImageUri = uriToLaunch
-                        cameraLauncher.launch(uriToLaunch)
-                    } else {
-                        cameraPermissionState.launchPermissionRequest()
-                    } },
+                .clickable {showDialog = true},
             contentAlignment = Alignment.Center
         ) {
             if (imageUri != null) {
@@ -125,4 +126,38 @@ fun ImageUploadArea(
             }
         }
     }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {Text("Choose an option") },
+            text = { Text("Would you like to take a new photo or choose one from your gallery?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        if (cameraPermissionState.status.isGranted) {
+                            val uriToLaunch = getTmpFileUri(context)
+                            tempImageUri = uriToLaunch
+                            cameraLauncher.launch(uriToLaunch)
+                        } else {
+                            cameraPermissionState.launchPermissionRequest()
+                        }
+                    }
+                ) {
+                    Text("Camera")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        galleryLauncher.launch("image/*") // Launch gallery
+                    }
+                ) {
+                    Text("Gallery")
+                }
+            }
+        )
+        }
 }
