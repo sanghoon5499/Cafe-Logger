@@ -16,6 +16,9 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             modelClass.isAssignableFrom(UploadViewModel::class.java) -> {
                 UploadViewModel(entryRepository) as T
             }
+            modelClass.isAssignableFrom(DetailsViewModel::class.java) -> {
+                DetailsViewModel(entryRepository) as T
+            }
 
             else -> {
                 throw IllegalArgumentException("Unknown ViewModel class")

@@ -38,4 +38,20 @@ class EntryRepository(private val context: Context) {
         }
     }
 
+    fun deleteEntry(entry: Entry) {
+        try {
+            val currentEntries = getEntries().toMutableList()
+            val wasRemoved = currentEntries.removeAll { it.timestamp == entry.timestamp }
+
+            if (wasRemoved) {
+                // Repeat file saving method from saveEntry()
+                val updatedJsonString = json.encodeToString(currentEntries)
+                context.openFileOutput(fileName, Context.MODE_PRIVATE).use {
+                    it.write(updatedJsonString.toByteArray())
+                }
+            }
+        } catch(e: IOException) {
+            e.printStackTrace()
+        }
+    }
 }
